@@ -1,0 +1,32 @@
+        .data
+welcome:    .asciiz "Welcome to my MIPS Array Program"
+newline:    .asciiz "\n"
+coma: 		.asciiz ","
+size:	    .word 10
+myarray:     .word 94, 13, 3, 58, 19, 38, 28, 36, 74, 80
+
+        .text
+        .globl main
+#================
+#		print address funciton
+#=======================
+
+printAddress:
+	# save registers
+	addi $sp,$sp,-4
+	sw $s0,0($sp)
+	#use registers
+	lw $s0, 0($a0)         # it will save the value that is in the address of the array
+	#print the value that the address holds
+    li $v0, 1              
+    add $a0,$s0,$0          # it will use the number selected to print
+    syscall	
+	#restore registers
+	lw $s0,0($sp)
+	addi $sp,$sp,4
+	jr $ra
+main: 
+	la $a0, myarray          # Load the base address of the array into $a0
+    addi $a0, $a0, 0      # This works for integers passed through, for registers I will use add
+
+	jal printAddress

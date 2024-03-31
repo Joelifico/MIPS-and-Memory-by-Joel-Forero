@@ -1,0 +1,102 @@
+        .data
+welcome:    .asciiz "Welcome to my MIPS Array Program"
+newline:    .asciiz "\n"
+size:	    .word 10
+coma: 		.asciiz "," 
+myarray:     .word 94, 13, 3, 58, 19, 38, 28, 36, 74, 80
+
+        .text
+        .globl main
+
+printnewline:
+    addi $sp,$sp,-4     #Prepare the stack for use of a register
+    sw $ra,($sp)        #Save current return address on the stack
+
+    #print newline
+    li $v0, 4           #syscall 4 to print string
+    la $a0, newline     #pass newline string
+    syscall             #print string
+
+    lw $ra, ($sp)       #Restore return address
+    addi $sp,$sp,4      #Restore stack pointer
+    jr $ra              #Return
+
+printarray:
+	#save register
+	addi $sp,$sp,-4
+	sw $s0, 0($sp)
+	#use register
+	move $s0,$a0
+	move $t2,$0
+	forloop:
+		slt $t1,$t2,$a1				# t1=1 if i<size  t2=i
+		beq $t1,$0,exit
+		#arrange for index
+		sll $t3,$t2,2			#i*4
+		add $t4,$s0,$t3		# this will fix the value of the index for i iterations in the array
+		lw $a0,0($t4)			# This will load the actual value of the index.
+		#print integers of the Array===========
+		li $v0,1
+		la $t4,myarray
+		syscall
+		# print coma====================
+		li  $v0,4		#print integers
+		la $a0,coma
+		syscall
+		addi $t2,$t2,1		#i++
+		j forloop
+	exit:
+		#restore registers===========================
+		lw $s0,0($sp)
+		addi $sp,$sp,4
+		jr $ra
+#====================================================================
+# 							Swap values procedure
+#==================================================================
+
+swapvalues:
+	#save registers
+	addi $sp,$sp, -8
+	sw $s1,4($sp)		#first value
+	sw $s0,0($sp)		#second value
+	#use register
+	#Calculate address at the given values to swap
+	sll  $s0, $a1,2					#first value to swap
+	add $s0,$a0,$s0
+	sll $s1, $a2, 2					#second value to swap
+	add $s1,$a0,$s1
+	
+	lw $t0,0($s0)
+	lw $t1,0($s1)
+	
+	move $t2,$t0			#it will save the value of the second value to swap in a temp variable
+	move $t0,$t1			#then it will put the first value into the position of the second value
+	move $t1,$t2			#after that it will put the second value into the original position of the first value
+	
+	sw $t0,0($s0)
+	sw $t1,0($s1)
+	
+	#restore registers
+	lw $s1,4($sp)
+	lw $s0,0($sp)
+	addi $sp,$sp,8
+	jr $ra
+	
+
+main:
+    addi $sp,$sp,-4     #Prepare the stack
+    sw $ra,($sp)        #Save current return address on the stack
+
+	la $a0,myarray
+	li $a1,0
+	li $a2, 9
+	jal swapvalues
+	
+	la $a0,myarray
+	lw  $a1,size
+	jal printarray
+	
+
+    lw $ra, ($sp)       #Restore return address from stack
+    addi $sp,$sp,4      #Restore stack pointer
+    jr $ra              #End program
